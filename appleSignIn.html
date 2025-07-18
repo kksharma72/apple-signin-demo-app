@@ -3,25 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <title>Sign in with Apple</title>
-
-  <!-- Apple Meta Tags -->
   <meta name="appleid-signin-client-id" content="com.princessauto.dev">
   <meta name="appleid-signin-scope" content="email name">
   <meta name="appleid-signin-redirect-uri" content="https://www-dev.princessauto.com/api/auth/callback/apple">
   <meta name="appleid-signin-state" content="123">
-  <meta name="appleid-signin-use-popup" content="true"> <!-- Ensure popup is used -->
-
-  <!-- Apple Sign In SDK -->
+  <meta name="appleid-signin-use-popup" content="true"> <!-- important -->
   <script src="https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js"></script>
 </head>
 <body>
   <h1>Sign In with Apple</h1>
 
-  <!-- This renders the official Apple button -->
+  <!-- Apple renders and handles this button -->
   <div id="appleid-signin" data-color="black" data-border="true" data-type="sign-in"></div>
-
-  <!-- Optional: You can also create a custom button and hook it -->
-  <!-- <button id="custom-sign-in">Sign in with Apple (Custom)</button> -->
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -29,41 +22,38 @@
         clientId: 'com.princessauto.dev',
         scope: 'name email',
         redirectURI: 'https://www-dev.princessauto.com/api/auth/callback/apple',
-        usePopup: true // Important: avoid full redirect
+        usePopup: true
       });
 
-      // Add event listener to capture response after popup sign-in
-      window.addEventListener('AppleIDSignInOnSuccess', async (event) => {
-        const { id_token, code } = event.detail.authorization;
-        const user = event.detail.user || null; // Only sent on first login
+      // ✅ Global callback - executes after popup sign-in completes
+      window.addEventListener('AppleIDSignInOnSuccess', function(event) {
+        const response = event.detail;
+        const { id_token, code } = response.authorization;
+        const user = response.user || null;
 
-        console.log('ID Token:', id_token);
-        console.log('User:', user);
+        console.log("✅ Apple Sign-In Success");
+        console.log("ID Token:", id_token);
+        console.log("User:", user);
 
-        try {
-          const res = await fetch('https://api-dev.princessauto.com/ecom/user/v1/users/social-signup', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              id_token,
-              user,
-              provider: 'apple'
-            })
-          });
-
-          const result = await res.json();
-          console.log("Backend Response:", result);
-          // Handle login success (store token, redirect, etc.)
-
-        } catch (err) {
-          console.error('Error sending token to backend:', err);
-        }
+        // Send to backend
+        fetch('https://api-dev.princessauto.com/ecom/user/v1/users/social-signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            id_token, 
+            user, 
+            provider: "apple" 
+          })
+        })
+        .then(res => res.json())
+        .then(result => {
+          console.log("Backend response:", result);
+          // Optionally handle accessToken / redirect to app
+        });
       });
 
-      window.addEventListener('AppleIDSignInOnFailure', (event) => {
-        console.error('Apple Sign-in Failed:', event.detail);
+      window.addEventListener('AppleIDSignInOnFailure', function(error) {
+        console.error("❌ Apple Sign-In Error", error);
       });
     });
   </script>
