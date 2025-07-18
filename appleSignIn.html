@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sign in with Apple</title>
+  <meta name="appleid-signin-client-id" content="com.example.app">
+  <meta name="appleid-signin-scope" content="email name">
+  <meta name="appleid-signin-redirect-uri" content="https://your-redirect-uri.com/callback">
+  <meta name="appleid-signin-state" content="123">
+  <meta name="appleid-signin-use-popup" content="true"> <!-- avoid redirect -->
+  <script src="https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js"></script>
+</head>
+<body>
+  <h1>Sign In with Apple</h1>
+
+  <div id="appleid-signin" data-color="black" data-border="true" data-type="sign-in"></div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      AppleID.auth.init({
+        clientId: 'com.princessauto.dev', // your client ID
+        scope: 'name email',
+        redirectURI: 'https://www-dev.princessauto.com/api/auth/callback/apple', // must match what's configured on Apple Developer portal
+        usePopup: true
+      });
+
+      document.getElementById('appleid-signin').addEventListener('click', async () => {
+        try {
+          const response = await AppleID.auth.signIn();
+          const id_token = response.authorization.id_token;
+
+          console.log("Apple ID Token:", id_token);
+
+          // Send id_token to your NestJS backend
+          const res = await fetch('https://your-backend.com/auth/apple', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id_token })
+          });
+
+          const result = await res.json();
+          console.log("Backend response:", result);
+
+          // handle result.accessToken etc.
+        } catch (err) {
+          console.error('Sign in with Apple failed', err);
+        }
+      });
+    });
+  </script>
+</body>
+</html>
