@@ -8,16 +8,18 @@ const port = process.env.PORT || 8080;
 const server = http.createServer(async (req, res) => {
   try {
     if (req.url === '/') {
-      const filePath = path.join(__dirname, 'main.html');
+      const filePath = path.join(__dirname, 'signin.html');
       const content = await fs.readFile(filePath);
       res.writeHead(200, { 'Content-Type': 'text/html' });
       res.end(content);
-    } else if (req.url === '/callback') {
-      const filePath = path.join(__dirname, 'appleSignIn.html');
+    } 
+    else if (req.url === '/callback') {
+      const filePath = path.join(__dirname, 'callback.html');
       const content = await fs.readFile(filePath);
       res.writeHead(200, { 'Content-Type': 'text/html' });
       res.end(content);
-    } else if (req.url === '/your-backend-endpoint' && req.method === 'POST') {
+    } 
+    else if (req.url === '/your-backend-endpoint' && req.method === 'POST') {
       let body = '';
       req.on('data', chunk => body += chunk);
       req.on('end', () => {

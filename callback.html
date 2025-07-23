@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Apple Sign-In Callback</title>
+  </head>
+<body>
+  <h1>Processing Apple Sign-In...</h1>
+  <p>Please wait while we log you in.</p>
+
+  <script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('Callback page DOM Content Loaded.');
+
+      // The Apple SDK is NOT initialized here, because Apple will POST to this page.
+      // We directly read from the form data.
+
+      // Apple sends the data as a POST request with Content-Type: application/x-www-form-urlencoded
+      // We need to access the form data that was submitted.
+      // Since browsers don't expose POST body directly to client-side JS on load,
+      // the standard approach for this flow is that your backend on `/callback`
+      // receives the POST, extracts id_token, and then *redirects* the user
+      // (perhaps with tokens in a cookie or as query params for frontend to read).
+
+      // However, if Apple sends it as a GET (response_mode=query or fragment),
+      // or if your server-side framework makes the POST body available, you could read it.
+
+      // *** IMPORTANT: The most common and secure way for form_post is for your
+      // *** backend to handle the POST directly on this /callback endpoint.
+      // *** So, this `callback.html` should ideally NOT be a static HTML file,
+      // *** but rather a backend endpoint that processes the POST request.
+      // *** I will provide the backend update for this below.
+
+      // IF you were to force Apple to send via GET (response_mode=query or fragment, less recommended):
+  
+      const urlParams = new URLSearchParams(window.location.search);
+      const idToken = urlParams.get('id_token');
+      const authCode = urlParams.get('code');
+      const state = urlParams.get('state');
+
+      console.log("ID Token from URL:", idToken);
+      console.log("Auth Code from URL:", authCode);
+      console.log("State from URL:", state);
+
+      if (idToken) {
+          // Validate state here against what you sent from the home page
+          // (e.g., from a cookie or session)
+
+          console.log("Sending ID Token from callback to backend...");
+          fetch('https://api-dev.princessauto.com/ecom/user/v1/users/social-signup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              id_token: idToken,
+              // user: null, // user object is not typically available in URL params
+              provider: "apple"
+            })
+          })
+          .then(res => res.json())
+          .then(result => {
+            console.log("Backend response from callback:", result);
+            // On success, redirect to home/dashboard
+            window.location.href = 'https://apple-signin-demo-app.onrender.com/dashboard'; // Or your home page
+          })
+          .catch(error => {
+            console.error("Error sending data to backend from callback:", error);
+            // Show error or redirect to login page
+            window.location.href = 'https://apple-signin-demo-app.onrender.com/?error=apple_auth_failed';
+          });
+      } else {
+        console.error("No ID Token or Code found on callback URL.");
+        window.location.href = 'https://apple-signin-demo-app.onrender.com/?error=apple_auth_missing_token';
+      }
+      
+
+      // Since `response_mode=form_post` is recommended, your backend will handle this.
+      // The current HTML will just load, and then your server-side route for /callback
+      // will take over. The script below might not even fully execute before a server-side redirect occurs.
+      // If you really need client-side processing of form_post, you'd need to
+      // access `document.forms[0].elements` or similar after the POST.
+      // However, it's generally better to let the backend fully handle `form_post`.
+
+      // A simple fallback if for some reason the page remains:
+      setTimeout(() => {
+        if (!document.body.innerText.includes('Successfully logged in')) { // Check if backend already redirected
+           console.log("Callback page loaded, expecting server-side redirect or client-side processing.");
+        }
+      }, 3000); // Wait a bit, then log
+    });
+  </script>
+</body>
+</html>
