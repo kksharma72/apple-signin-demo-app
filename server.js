@@ -8,6 +8,11 @@ const port = process.env.PORT || 8080;
 const server = http.createServer(async (req, res) => {
   try {
     if (req.url === '/') {
+      const filePath = path.join(__dirname, 'main.html');
+      const content = await fs.readFile(filePath);
+      res.writeHead(200, { 'Content-Type': 'text/html' });
+      res.end(content);
+    } else if (req.url === '/callback') {
       const filePath = path.join(__dirname, 'appleSignIn.html');
       const content = await fs.readFile(filePath);
       res.writeHead(200, { 'Content-Type': 'text/html' });

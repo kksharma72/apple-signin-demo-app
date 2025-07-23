@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hello, World!</title>
+  <style>
+    /* General Reset */
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    /* Background styling */
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(45deg, #ff7eb3, #ff758c, #ff6a63, #ffa53b);
+      background-size: 400% 400%;
+      animation: gradientBackground 10s ease infinite;
+      overflow: hidden;
+      color: #fff;
+    }
+
+    /* Gradient Animation */
+    @keyframes gradientBackground {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Main Heading Styling */
+    h1 {
+      font-size: 4rem;
+      text-align: center;
+      background-image: linear-gradient(90deg, #00d2ff, #3a7bd5);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      animation: glowingText 5s ease-in-out infinite;
+    }
+
+    /* Glowing Effect for Text */
+    @keyframes glowingText {
+      0% {
+        text-shadow: 0 0 5px #00d2ff, 0 0 10px #00d2ff, 0 0 20px #3a7bd5, 0 0 30px #3a7bd5, 0 0 40px #3a7bd5, 0 0 50px #3a7bd5, 0 0 60px #3a7bd5;
+      }
+      50% {
+        text-shadow: 0 0 5px #3a7bd5, 0 0 10px #00d2ff, 0 0 20px #00d2ff, 0 0 30px #00d2ff, 0 0 40px #00d2ff, 0 0 50px #3a7bd5, 0 0 60px #00d2ff;
+      }
+      100% {
+        text-shadow: 0 0 5px #00d2ff, 0 0 10px #00d2ff, 0 0 20px #3a7bd5, 0 0 30px #3a7bd5, 0 0 40px #3a7bd5, 0 0 50px #3a7bd5, 0 0 60px #3a7bd5;
+      }
+    }
+
+    /* Subtext Styling */
+    p {
+      font-size: 1.25rem;
+      text-align: center;
+      margin-top: 20px;
+      animation: fadeIn 3s ease-in-out infinite alternate;
+    }
+
+    /* Fade-In Animation for Subtext */
+    @keyframes fadeIn {
+      from {
+        opacity: 0.5;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    /* Sparkling Stars Background */
+    .stars {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: -1;
+    }
+
+    .stars span {
+      position: absolute;
+      border-radius: 50%;
+      background: white;
+      width: 2px;
+      height: 2px;
+      animation: twinkling 5s infinite;
+    }
+
+    /* Position Stars Randomly */
+    .stars span:nth-child(odd) {
+      animation-duration: 7s;
+    }
+
+    /* Twinkling Effect for Stars */
+    @keyframes twinkling {
+      0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+      50% {
+        opacity: 0.2;
+        transform: scale(1.5);
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Background Stars -->
+  <div class="stars">
+    <span style="top: 10%; left: 20%;"></span>
+    <span style="top: 40%; left: 15%;"></span>
+    <span style="top: 20%; left: 90%;"></span>
+    <span style="top: 85%; left: 45%;"></span>
+    <span style="top: 70%; left: 60%;"></span>
+    <span style="top: 50%; left: 80%;"></span>
+    <span style="top: 30%; left: 55%;"></span>
+    <span style="top: 65%; left: 25%;"></span>
+    <span style="top: 5%; left: 75%;"></span>
+    <span style="top: 95%; left: 10%;"></span>
+  </div>
+
+  <!-- Main Content -->
+  <main>
+    <h1>Hello, World!</h1>
+    <p>Welcome to the fancy HTML page. ✨</p>
+  </main>
+</body>
+</html>

@@ -5,56 +5,95 @@
   <title>Sign in with Apple</title>
   <meta name="appleid-signin-client-id" content="com.princessauto.dev">
   <meta name="appleid-signin-scope" content="email name">
-  <meta name="appleid-signin-redirect-uri" content="https://apple-signin-demo-app.onrender.com/callback">
-  <meta name="appleid-signin-state" content="123">
-  <meta name="appleid-signin-use-popup" content="true"> <!-- important -->
-  <script src="https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js"></script>
+  <meta name="appleid-signin-redirect-uri" content="https://apple-signin-demo-app.onrender.com/callback"> <meta name="appleid-signin-state" content="123">
+  <meta name="appleid-signin-use-popup" content="true">
+  <script type="text/javascript" src="https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js"></script>
 </head>
 <body>
   <h1>Sign In with Apple</h1>
 
-  <!-- Apple renders and handles this button -->
   <div id="appleid-signin" data-color="black" data-border="true" data-type="sign-in"></div>
 
-  <script>
+  <script type="text/javascript">
     document.addEventListener('DOMContentLoaded', () => {
+      console.log('DOM Content Loaded. Initializing AppleID.auth...');
+
       AppleID.auth.init({
         clientId: 'com.princessauto.dev',
         scope: 'name email',
-        redirectURI: 'https://apple-signin-demo-app.onrender.com/callback',
-        usePopup: true
+        // FIX: Ensure this matches the meta tag and your Apple Developer Console for usePopup:true
+        redirectURI: 'https://apple-signin-demo-app.onrender.com/',
+        usePopup: true,
+        // Optional: add a unique nonce for security in production
+        // nonce: 'your-dynamic-nonce-value'
       });
+      console.log('AppleID.auth initialized.');
 
-      // ✅ Global callback - executes after popup sign-in completes
-      window.addEventListener('AppleIDSignInOnSuccess', function(event) {
-        const response = event.detail;
-        const { id_token, code } = response.authorization;
-        const user = response.user || null;
-
-        console.log("✅ Apple Sign-In Success");
-        console.log("ID Token:", id_token);
-        console.log("User:", user);
-
-        // Send to backend
-        fetch('https://api-dev.princessauto.com/ecom/user/v1/users/social-signup', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            id_token, 
-            user, 
-            provider: "apple" 
-          })
-        })
-        .then(res => res.json())
-        .then(result => {
-          console.log("Backend response:", result);
-          // Optionally handle accessToken / redirect to app
+      // Add a listener for the button click to confirm it's working
+      const appleButton = document.getElementById('appleid-signin');
+      if (appleButton) {
+        appleButton.addEventListener('click', () => {
+          console.log('Apple Sign-In button clicked!');
         });
+      } else {
+        console.warn('Apple Sign-In button element not found.');
+      }
+
+      window.addEventListener('AppleIDSignInOnSuccess', function(event) {
+        console.log("✅ Apple Sign-In Success event received!");
+        const response = event.detail;
+        const { id_token, code } = response.authorization; // 'code' is the authorization code, 'id_token' is the JWT
+        const user = response.user || null; // User info (name, email) only on first sign-in
+
+        console.log("Response Detail:", response);
+        console.log("ID Token:", id_token);
+        console.log("Authorization Code (if any):", code);
+        console.log("User Info (first time only):", user);
+
+        if (id_token) {
+          console.log("Sending ID Token to backend...");
+          fetch('https://api-dev.princessauto.com/ecom/user/v1/users/social-signup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              id_token,
+              user, // Send user info if available
+              provider: "apple"
+            })
+          })
+          .then(res => {
+            console.log("Backend fetch response status:", res.status);
+            if (!res.ok) {
+              console.error("Backend fetch error:", res.statusText);
+              // Try to parse error message from backend
+              return res.json().then(err => { throw new Error(err.message || "Unknown backend error"); });
+            }
+            return res.json();
+          })
+          .then(result => {
+            console.log("Backend response (success):", result);
+            // Handle successful login (e.g., store user data, redirect)
+          })
+          .catch(error => {
+            console.error("Error sending data to backend or backend processing error:", error);
+          });
+        } else {
+          console.warn("No ID Token found in Apple Sign-In success response.");
+          // This case is unlikely for typical usePopup flow, but good for robustness
+        }
       });
 
       window.addEventListener('AppleIDSignInOnFailure', function(error) {
-        console.error("❌ Apple Sign-In Error", error);
+        console.error("❌ Apple Sign-In Error event received!", error);
+        // Display error to the user if needed
       });
+
+      // You can also add a listener for when the SDK is loaded and ready
+      // This is generally handled internally by the SDK and the DOMContentLoaded,
+      // but if you have complex async loading, it could be useful.
+      // window.addEventListener('AppleIDSignInOnLoad', function() {
+      //   console.log('AppleID SDK loaded and ready.');
+      // });
     });
   </script>
 </body>
